@@ -78,11 +78,11 @@ searchd
 
 	# log file, searchd run info is logged here
 	# optional, default is 'searchd.log'
-	log			= @CONFDIR@/log/searchd.log
+	log			= /var/log/searchd.log
 
 	# query log file, all search queries are logged here
 	# optional, default is empty (do not log queries)
-	query_log		= @CONFDIR@/log/query.log
+	query_log		= /var/log/query.log
 
 	# client read timeout, seconds
 	# optional, default is 5
@@ -98,7 +98,7 @@ searchd
 
 	# PID file, searchd process ID file name
 	# mandatory
-	pid_file		= @CONFDIR@/log/searchd.pid
+	pid_file		= /var/log/searchd.pid
 
 	# max amount of matches the daemon ever keeps in RAM, per-index
 	# WARNING, THERE'S ALSO PER-QUERY LIMIT, SEE SetLimits() API CALL
@@ -144,7 +144,7 @@ searchd
 	# searchd will (try to) log crashed query to 'crash_log_path.PID' file
 	# optional, default is empty (do not create crash logs)
 	#
-	# crash_log_path		= @CONFDIR@/log/crash
+	# crash_log_path		= /var/log/crash
 
 
 	# max allowed per-query filter count
@@ -209,7 +209,7 @@ searchd
 	# optional, default is build-time configured data directory
 	#
 	# binlog_path		= # disable logging
-	# binlog_path		= @CONFDIR@/data # binlog.001 etc will be created there
+	# binlog_path		= /var/data # binlog.001 etc will be created there
 
 
 	# binlog flush/sync mode

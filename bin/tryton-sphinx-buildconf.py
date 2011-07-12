@@ -280,7 +280,7 @@ searchd
 	#
 	# watchdog				= 1
 
-	
+
 	# SphinxQL compatibility mode (legacy columns and their names)
 	# optional, default is 0 (SQL compliant syntax and result sets)
 	#
@@ -320,6 +320,10 @@ if __name__ == '__main__':
 
         for model_object in iter_sql_models(pool):
             ds = DataSource.from_model(model_object, base_source)
+            if not ds.sql_query:
+                # If there are no attributes which have select=1 then there will
+                # be no sql query, so just ignore those data sources
+                continue
             file.write(ds.as_string())
 
         file.write(INDEXER_SETTINGS)

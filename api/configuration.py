@@ -171,7 +171,7 @@ class DataSource(object):
  
         if attributes:
             # Construct the SQL query if attributes do exist
-            sql_query = ['"SELECT "%s"."id" AS "id",' % model_object._table]
+            sql_query = ['SELECT "%s"."id" AS "id",' % model_object._table]
             sql_query.append(", ".join([
                 '"%s"."%s" AS "%s"' % (model_object._table, name, name) \
                     for name in attributes.keys()

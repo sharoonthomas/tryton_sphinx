@@ -62,4 +62,6 @@ def install_sphinx_search():
     sudo('mkdir /var/log/sphinx')
 
 def install_tryton_sphinx():
-    run("pip install -e git+git://github.com/dfamorato/tryton_search.git")
+    run("pip install trytond")
+    run("pip install psycopg2")
+    run("pip install git+git://github.com/dfamorato/tryton_sphinx.git")

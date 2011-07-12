@@ -1,12 +1,12 @@
 A Tryton ERP module to enable Sphinx Search Server integration
 
 This is a work in progress, more information can be found at:
-[http://trytonsearch.blogspot.com]
+http://trytonsearch.blogspot.com
 
 **THIS IS A WORK IN PROGRESS.**
 
 ## Installation of the Sphinx Search Server - THE EASY WAY
-**If you have an ubuntu server, YOU ARE LUCKY:**
+**If you have an Ubuntu Server >= 10.04 , YOU ARE LUCKY:**
 
 ### ASSUMPTIONS
 * I assume that have a clean Ubuntu machine version >= 10.04
@@ -18,7 +18,8 @@ This is a work in progress, more information can be found at:
 * I will use `python fabric` to make the installation
 * I assume that you have backed up you data
 
-**If you understood the assumptions, then proceed:**
+**If you understood the assumptions, then you can proceed:**
+        
     easy-install pip
     pip install fabric 
     wget http://github.com/dfamorato/tryton_sphinx/extras/fabfile.py 
@@ -26,8 +27,8 @@ This is a work in progress, more information can be found at:
 
 ## Installation requirements
 
-TrytonSphinx module requires you to have either a `PostgreSQL` or a `MySQL` database
-You will need the `build-essentials` package in order to compile Sphinx Search Server
+* TrytonSphinx module requires you to have either a `PostgreSQL` or a `MySQL` database.
+* You will need the `build-essentials` package in order to compile Sphinx Search Server
 from the source code.
 
 

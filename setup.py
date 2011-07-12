@@ -9,13 +9,14 @@
     :copyright: (c) 2011 by Douglas Morato
     :license: BSD, see LICENSE for more details.
 """
-from setuptools import setup 
+from setuptools import setup
 
-import api
+__author__ = 'Douglas Morato'
+__version__ = '0.1'
 
 setup(
     name = "TrytonSphinx",
-    version = api.__version__,
+    version = __version__,
 
     packages = [
         'tryton_sphinx'
@@ -33,7 +34,7 @@ setup(
 
 
     # metadata for upload to PyPI
-    author = api.__author__,
+    author = __author__,
     author_email = "dfamorato@gmail.com",
     description = __doc__,
     license = "BSD",

@@ -22,7 +22,7 @@ http://trytonsearch.blogspot.com
         
     easy-install pip
     pip install fabric 
-    wget http://github.com/dfamorato/tryton_sphinx/extras/fabfile.py 
+    wget https://raw.github.com/dfamorato/tryton_sphinx/master/extras/fabfile.py 
     fab -u `username` -H `target_machine` install_sphinx_search install_tryton_sphinx
 
 ## Installation requirements

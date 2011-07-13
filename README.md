@@ -40,16 +40,41 @@ from the source code.
     
 ### Building Sphinx Search Config File  
 
-    FUNCTIONALITY EXISTS, DOCUMENTATION TO BE DONE
+The module installs a script to your environments bin called `tryton-sphinx-buildconf` which could be used to build the sphinx config from your tryton database and configuration file.
+
+    tryton-sphinx-buildconf.py --help
+
+    Usage: tryton-sphinx-buildconf.py [options] database filename
+
+    Options:
+      -h, --help            show this help message and exit
+      -c CONFIG, --config=CONFIG
+                        The tryton configuration file to use
+
+an example usage of the file would be:
+
+    tryton-sphinx-buildconf.py -c /etc/trytond.conf database_name sphinx.conf
+
+and the script will iterate through all your models and generate the corresponding sphinx config file.
 
 ### Building Sphinx Search Index
     
-    FUNCTIONALITY EXISTS, DOCUMENTATION  TO BE DONE
-      
+To build the index, use the sphinx.conf file generated in the previous step with the indexer program that was installed by sphinx. Example:
+
+    indexer -c sphinx.conf --all
+
+This creates all indexes. The second time you run the indexer, the files need to be rotated and hence pass `--rotate` argument in addition.
+
+The index files are created in a directory called `sphinx`in the data path specified in the tryton config. Ensure that the same exists.
+
+### Starting the search server
+
+`searchd`is the search daemon
+
+    searchd -c sphinx.conf
+
 ### Examples on how to query the search index
 
-    WORK TO BE DONE
-    
-### Regenerate Sphinx Search Server configuration
-   
-    FUNCTIONALITY EXISTS, DOCUMENTATION  TO BE DONE
+sphinx comes bundled with a client to `searchd` and is available as a program called `search`. This could be used to test the search without writing any API code at all. For example to search inside the product index for a product name say 'iphone' you could write:
+
+    search -c sphinx.conf -i product_template iphone

@@ -19,11 +19,30 @@ http://trytonsearch.blogspot.com
 * I assume that you have backed up you data
 
 **If you understood the assumptions, then you can proceed:**
-        
-    easy-install pip
-    pip install fabric 
+
+It is highly recommended that you do the following in a `virtualenv` so that your root python environment is not F**ked! 
+
+Install virtualenv:
+
+    easy_install virtualenv
+
+To create a virtualenv:
+
+    virtualenv tryton_search
+
+**Installing Sphinx:**
+
+If you want to use the bundled helper to install sphinx server
+
+    pip install fabric
     wget https://raw.github.com/dfamorato/tryton_sphinx/master/extras/fabfile.py 
-    fab -u `username` -H `target_machine` install_sphinx_search install_tryton_sphinx
+    fab -u `username` -H `target_machine` install_sphinx_search
+
+**Installing the module**
+
+    git clone git://github.com/dfamorato/tryton_sphinx.git
+    cd tryton_sphinx
+    python setup.py install
 
 ## Installation requirements
 

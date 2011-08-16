@@ -105,7 +105,7 @@ def stream_new_records(pool, model, stream):
 
     # Send the schema first
     stream.write("<sphinx:schema>")
-    for name, type in attributes.iter_items():
+    for name, type in attributes.iteritems():
         if type == 'field':
             stream.write(u'<sphinx:field name="%s"/>'% name)
         else:

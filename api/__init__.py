@@ -9,6 +9,6 @@
 """
 
 __author__ = 'Douglas Morato'
-__version__ = '0.1'
+__version__ = '0.2'
 
-from configuration import BaseSource, DataSource
+from configuration import BaseSQLSource, SQLDataSource, XMLSource

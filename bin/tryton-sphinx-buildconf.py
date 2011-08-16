@@ -327,14 +327,14 @@ if __name__ == '__main__':
             for model_object in iter_sql_models(pool):
                 ds = SQLDataSource.from_model(model_object, base_source)
                 if not ds.sql_query:
-                    # If there are no attributes which have select=1 then there will
-                    # be no sql query, so just ignore those data sources
+                    # If there are no attributes which have select=1 then there
+                    # will be no sql query, so just ignore those data sources
                     continue
                 file.write(ds.as_string())
 
         if options.source_type == 'xmlpipe':
             for model_object in iter_sql_models(pool):
-                ds = XMLSource(args[0], model_object)
+                ds = XMLSource.from_model(args[0], model_object)
                 file.write(ds.as_string())
 
         file.write(INDEXER_SETTINGS)

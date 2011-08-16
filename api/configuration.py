@@ -46,7 +46,7 @@ class XMLSource(object):
         # TODO: Morphology
         # TODO: An indexer for each language ???
         command = 'xmlpipe2_trytond %s %s %s' % (
-            CONFIG.config_file, database_name, model_object._name)
+            CONFIG.configfile, database_name, model_object._name)
         return cls(model_object._table, command)
 
     def as_string(self):

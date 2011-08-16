@@ -294,6 +294,8 @@ if __name__ == '__main__':
     from optparse import OptionParser
     usage = "usage: %prog [options] database filename"
     parser = OptionParser(usage=usage)
+    parser.add_option('-u', '--user', dest="user",
+        default='admin', help="The user to be used")
     parser.add_option('-c', '--config', dest="config",
         default=None, help="The tryton configuration file to use")
     parser.add_option('-a', '--all', dest="all",
@@ -334,7 +336,7 @@ if __name__ == '__main__':
 
         if options.source_type == 'xmlpipe':
             for model_object in iter_sql_models(pool):
-                ds = XMLSource.from_model(args[0], model_object)
+                ds = XMLSource.from_model(args[0], options.user, model_object)
                 file.write(ds.as_string())
 
         file.write(INDEXER_SETTINGS)

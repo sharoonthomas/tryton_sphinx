@@ -30,7 +30,7 @@ if __name__ == '__main__':
         CONFIG.configfile = options.config
         CONFIG.load()
 
-    regsiter_classes()
+    register_classes()
     pool = Pool(args[0])
     pool.init()
 

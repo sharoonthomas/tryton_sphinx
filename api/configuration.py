@@ -14,8 +14,8 @@ from jinja2 import Environment
 from utils import guess_type
 
 
-class BaseSource(object):
-    """Sphinx allows inheritance in data sources. having the SQL settings for 
+class BaseSQLSource(object):
+    """Sphinx allows inheritance in data sources. having the SQL settings for
     each model object would be too redundant since the only changing attributes
     are the SQL query itself and the various attributes.
     """
@@ -25,8 +25,8 @@ class BaseSource(object):
     #: be unique for every model that has a database representation (in other
     #: words every object other than wizards and reports).
     #:
-    #: For the Base Source this defaults to `base_source` and any 
-    #: :class:`DataSource` which inherits from :class:`BaseSource` will use the
+    #: For the Base Source this defaults to `base_source` and any
+    #: :class:`SQLDataSource` which inherits from :class:`BaseSQLSource` will use the
     #: settings from this instance
     name = 'base_source'
 
@@ -45,7 +45,7 @@ class BaseSource(object):
 
     @classmethod
     def from_tryton_config(cls, database_name):
-        """Creates a :class:`BaseSource` from the current tryton configuration
+        """Creates a :class:`BaseSQLSource` from the current tryton configuration
         in the environment.
 
         :param database_name: The database name to use in the database source.
@@ -97,12 +97,12 @@ source {{name}}
             )
 
 
-class DataSource(object):
-    """This class represents a `sphinx data source 
-    <http://sphinxsearch.com/docs/1.10/sources.html>`_. 
+class SQLDataSource(object):
+    """This class represents a `sphinx data source
+    <http://sphinxsearch.com/docs/2.0.1/sources.html>`_.
 
-    The data to be indexed can generally come from very different sources: 
-    SQL databases, plain text files, HTML files, mailboxes, and so on. From 
+    The data to be indexed can generally come from very different sources:
+    SQL databases, plain text files, HTML files, mailboxes, and so on. From
     Sphinx point of view, the data it indexes is a set of structured documents,
     each of which has the same set of fields. This is biased towards SQL, where
     each row correspond to a document, and each column to a field.
@@ -142,16 +142,16 @@ class DataSource(object):
     def from_model(cls, model_object, base_source = None):
         """Creates and returns a new data source from a given model
 
-        :param model_object: The instance of a model as obtained from the 
+        :param model_object: The instance of a model as obtained from the
                              `trytond.pool.Pool`
-        :param base_source: The base_source to inherit from. Must be an 
-                            instance of :class:`BaseSource`
+        :param base_source: The base_source to inherit from. Must be an
+                            instance of :class:`BaseSQLSource`
         """
         assert isinstance(model_object, ModelSQL), \
             "model_object must be an instance of ModelSQL"
         if base_source:
-            assert isinstance(base_source, BaseSource), \
-                "base_source must be an instance of BaseSource (got %s)" % type(
+            assert isinstance(base_source, BaseSQLSource), \
+                "base_source must be an instance of BaseSQLSource (got %s)" % type(
                     base_source)
 
         attributes = {}

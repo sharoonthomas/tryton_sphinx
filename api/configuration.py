@@ -7,6 +7,8 @@
     :copyright: (c) 2011 by Douglas Morato
     :license: BSD, see LICENSE for more details.
 """
+import os
+
 from trytond.model import ModelSQL
 from trytond.config import CONFIG
 from jinja2 import Environment
@@ -46,7 +48,9 @@ class XMLSource(object):
         # TODO: Morphology
         # TODO: An indexer for each language ???
         command = 'xmlpipe2_trytond %s %s %s' % (
-            CONFIG.configfile, database_name, model_object._name)
+            os.path.abspath(CONFIG.configfile),
+            database_name,
+            model_object._name)
         return cls(model_object._table, command)
 
     def as_string(self):

@@ -320,10 +320,10 @@ if __name__ == '__main__':
     pool.init()
 
     with open(args[1], 'wb') as file:
-        base_source = BaseSource.from_tryton_config(args[0])
-        file.write(base_source.as_string())
 
         if options.source_type == 'sql':
+            base_source = BaseSQLSource.from_tryton_config(args[0])
+            file.write(base_source.as_string())
             for model_object in iter_sql_models(pool):
                 ds = SQLDataSource.from_model(model_object, base_source)
                 if not ds.sql_query:

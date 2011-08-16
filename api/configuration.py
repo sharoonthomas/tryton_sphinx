@@ -14,6 +14,68 @@ from jinja2 import Environment
 from utils import guess_type
 
 
+class XMLSource(object):
+    """Sphinx needs to invoke xmlpipe stream producer in order index data
+    incoming from strem
+
+    :param name: Name of the source and index in sphinx.conf
+    :param command: Shell command to invoke xmlpipe stream producer.
+    :param fields: List of field names for full text indexing.
+    :param attributes: A :class:`dict` of fiueld names as keys and type as
+                       values eg. {'name': 'xmlpipe_attr_uint'}
+    """
+    fields = []
+    attributes = dict()
+
+    def __init__(self, name, command, fields=None, attributes=None):
+        self.name = name
+        self.command = command
+        if fields is not None:
+            self.fields = fields
+        if attributes is not None:
+            self.attributes = attributes
+
+    @classmethod
+    def from_model(cls, database_name, model_object):
+        """Creates and returns an XMLPIPE2 data source
+
+        :param database_name: The name of tryton database to index data from
+        :param model_obj: The instance of a model as obtained from
+                          `trytond.pool.Pool`
+        """
+        # TODO: Morphology
+        # TODO: An indexer for each language ???
+        command = 'xmlpipe2_trytond %s %s %s' % (
+            CONFIG.config_file, database_name, model_object._name)
+        return cls(model_object._table, command)
+
+    def as_string(self):
+        """Returns the string representation of the confis as it has to appear
+        in the sphinx config"""
+        template = Environment().from_string("""
+source {{cls.name}}
+{
+    type                =   xmlpipe
+    xmlpipe_command     =   {{ cls.command }}
+
+    {% for attr_name, attr_type in cls.attributes %}
+    {{ attr_type }}     =   {{ attr_name }}
+    {% endfor %}
+
+    {% for name in cls.fields %}
+    xmlpipe_field       =   {{ name }}
+    {% endfor %}
+}
+
+index {{cls.name}}
+{
+    source              =   {{ cls.name }}
+    path                =   {{config.options['data_path']}}/sphinx/{{cls.name}}
+}
+        """)
+        return template.render(cls=self, config=CONFIG)
+
+
 class BaseSQLSource(object):
     """Sphinx allows inheritance in data sources. having the SQL settings for
     each model object would be too redundant since the only changing attributes

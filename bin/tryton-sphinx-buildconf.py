@@ -9,7 +9,7 @@
     :copyright: (c) 2011 by Douglas Morato
     :license: BSD, see LICENSE for more details.
 """
-from tryton_sphinx import BaseSource, DataSource
+from tryton_sphinx import BaseSQLSource, SQLDataSource, XMLSource
 from tryton_sphinx.utils import iter_sql_models
 
 INDEXER_SETTINGS = """
@@ -296,6 +296,11 @@ if __name__ == '__main__':
     parser = OptionParser(usage=usage)
     parser.add_option('-c', '--config', dest="config",
         default=None, help="The tryton configuration file to use")
+    parser.add_option('-a', '--all', dest="all",
+        default=False,
+        help="Index all models, not just the ones defined in Search Settings")
+    parser.add_option('-s', '--source_type', dest='source_type',
+        default='xmlpipe', help="Type of the source to use (sql|xmlpipe)")
     (options, args) = parser.parse_args()
 
     if len(args) != 2:
@@ -318,13 +323,19 @@ if __name__ == '__main__':
         base_source = BaseSource.from_tryton_config(args[0])
         file.write(base_source.as_string())
 
-        for model_object in iter_sql_models(pool):
-            ds = DataSource.from_model(model_object, base_source)
-            if not ds.sql_query:
-                # If there are no attributes which have select=1 then there will
-                # be no sql query, so just ignore those data sources
-                continue
-            file.write(ds.as_string())
+        if options.source_type == 'sql':
+            for model_object in iter_sql_models(pool):
+                ds = SQLDataSource.from_model(model_object, base_source)
+                if not ds.sql_query:
+                    # If there are no attributes which have select=1 then there will
+                    # be no sql query, so just ignore those data sources
+                    continue
+                file.write(ds.as_string())
+
+        if options.source_type == 'xmlpipe':
+            for model_object in iter_sql_models(pool):
+                ds = XMLSource(args[0], model_object)
+                file.write(ds.as_string())
 
         file.write(INDEXER_SETTINGS)
         file.write(SEARCHD_SETTINGS)

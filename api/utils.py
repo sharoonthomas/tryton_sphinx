@@ -99,7 +99,7 @@ def stream_new_records(pool, model, stream):
         if field.select != 1:
             continue
         try:
-            attributes[name] = guess_type(field)
+            attributes[name] = guess_xml_type(field)
         except ValueError:
             continue
 

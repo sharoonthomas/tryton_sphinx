@@ -7,9 +7,9 @@ class Model(ModelSQL, ModelView):
     """Full Text Search Enabled Models"""
     _name = "search.model"
     _description = __doc__
-    _inherits = {'model': 'res.model'}
+    _inherits = {'ir.model': 'model'}
 
-    model = fields.Many2One('res.model', 'Model', required=True)
+    model = fields.Many2One('ir.model', 'Model', required=True)
     last_updated = fields.DateTime('Last Updated', readonly=True)
 
     def __init__(self):

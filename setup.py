@@ -62,6 +62,7 @@ setup(
 
     install_requires = requires,
     entry_points=entry_points,
+    zip_safe=False,
 
     # metadata for upload to PyPI
     author = __author__,

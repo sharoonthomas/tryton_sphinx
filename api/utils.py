@@ -83,7 +83,8 @@ def iter_search_models(pool):
     """
     search_model_obj = pool.get('search.model')
 
-    for model in search_model_obj.search([]):
+    ids = search_model_obj.search([])
+    for model in search_model_obj.browse(ids):
         yield pool.get(model.model.model)
     raise StopIteration
 

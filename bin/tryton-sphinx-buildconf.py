@@ -10,7 +10,7 @@
     :license: BSD, see LICENSE for more details.
 """
 from tryton_sphinx import BaseSQLSource, SQLDataSource, XMLSource
-from tryton_sphinx.utils import iter_sql_models
+from tryton_sphinx.utils import iter_sql_models, iter_search_models
 
 INDEXER_SETTINGS = """
 #############################################################################
@@ -318,6 +318,7 @@ if __name__ == '__main__':
     register_classes()
 
     from trytond.pool import Pool
+    from trytond.transaction import Transaction
     pool = Pool(args[0])
     pool.init()
 
@@ -335,9 +336,10 @@ if __name__ == '__main__':
                 file.write(ds.as_string())
 
         if options.source_type == 'xmlpipe':
-            for model_object in iter_sql_models(pool):
-                ds = XMLSource.from_model(args[0], options.user, model_object)
-                file.write(ds.as_string())
+            with Transaction().start(args[0], 0, None):
+                for model_object in iter_search_models(pool):
+                    ds = XMLSource.from_model(args[0], options.user, model_object)
+                    file.write(ds.as_string())
 
         file.write(INDEXER_SETTINGS)
         file.write(SEARCHD_SETTINGS)

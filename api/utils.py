@@ -76,6 +76,16 @@ def iter_sql_models(pool):
             yield model_obj
     raise StopIteration
 
+def iter_search_models(pool):
+    """Given a pool iterate over all models that inherit from ModelSQL
+
+    :param pool: AN instance of init'ed `trytond.pool.Pool` for a DB
+    """
+    search_model_obj = pool.get('search.model')
+
+    for model in search_model_obj.search([]):
+        yield pool.get(model.model.model)
+    raise StopIteration
 
 def stream_new_records(pool, model, stream):
     """Writes XML documents of all the new records after the last udpate of

@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+    xmlpipe builder for streaming trytond records for indexing
+
+    :copyright: (c) 2011 by Douglas Morato
+    :license: BSD, see LICENSE for more details.
+"""
+import sys
+
+from trytond.pool import Pool
+from trytond.transaction import Transaction
+
+from tryton_sphinx.utils import stream_new_records, stream_kill_list
+
+if __name__ == '__main__':
+    from optparse import OptionParser
+    usage = "usage: %prog [options] database user model"
+    parser = OptionParser(usage=usage)
+    parser.add_option('-c', '--config', dest="config",
+        default=None, help="The tryton configuration file to use")
+    (options, args) = parser.parse_args()
+
+    if len(args) != 3:
+        parser.error("Expected 3 argument got %d" % len(args))
+
+    pool = Pool(args[0])
+    pool.init()
+
+    with Transaction().start(args[0], args[1], None):
+        user_obj = pool.get('res.user')
+        search_model_obj = pool.get('search.model')
+        ir_date_obj = pool.get('ir.date')
+
+        # Load the context of the user so that language and company settings are
+        # automatically available
+        context = user_obj.get_preferences(True)
+
+        indexed_model = search_model_obj.search(
+                [('model.model', '=', args[2])])
+        model = search_model_obj.browse(indexed_model)
+        with Transaction().new_cursor() as transaction:
+            # Execute in a different Transaction so that changes being too
+            # long does not result in stale records and locks
+            timestamp = ir_date_obj.today()
+
+            stream = sys.stdout
+            stream.write('<?xml version="1.0" encoding="utf-8"?>')
+            stream.write("<sphinx:docset>")
+            stream_new_records(pool, model, stream)
+            stream_kill_list(pool, model, stream)
+            stream.write("</sphinx:docset>")
+
+            search_model_obj.write(
+                model.id, {'last_updated': timestamp}
+            )
+            transaction.cursor.commit()

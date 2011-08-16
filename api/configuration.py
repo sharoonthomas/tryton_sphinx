@@ -38,7 +38,7 @@ class XMLSource(object):
             self.attributes = attributes
 
     @classmethod
-    def from_model(cls, database_name, model_object):
+    def from_model(cls, database_name, user, model_object):
         """Creates and returns an XMLPIPE2 data source
 
         :param database_name: The name of tryton database to index data from
@@ -47,9 +47,10 @@ class XMLSource(object):
         """
         # TODO: Morphology
         # TODO: An indexer for each language ???
-        command = 'xmlpipe2_trytond %s %s %s' % (
+        command = 'xmlpipe2_trytond -c %s %s %s %s' % (
             os.path.abspath(CONFIG.configfile),
             database_name,
+            user,
             model_object._name)
         return cls(model_object._table, command)
 

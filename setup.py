@@ -58,7 +58,10 @@ setup(
     packages = packages,
     package_dir = package_dir,
     package_data = package_data,
-    scripts = ['bin/tryton-sphinx-buildconf.py'],
+    scripts = [
+        'bin/tryton-sphinx-buildconf.py',
+        'bin/xmlpipe2_trytond',
+    ],
 
     install_requires = requires,
     entry_points=entry_points,

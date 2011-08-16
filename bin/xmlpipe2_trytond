@@ -7,7 +7,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import sys
-
+from datetime import datetime
 from trytond.config import CONFIG
 from trytond.modules import register_classes
 from trytond.pool import Pool
@@ -52,7 +52,7 @@ if __name__ == '__main__':
         with Transaction().new_cursor() as transaction:
             # Execute in a different Transaction so that changes being too
             # long does not result in stale records and locks
-            timestamp = ir_date_obj.today()
+            timestamp = datetime.today()
 
             stream = sys.stdout
             stream.write('<?xml version="1.0" encoding="utf-8"?>')

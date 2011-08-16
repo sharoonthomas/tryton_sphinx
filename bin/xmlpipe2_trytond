@@ -8,6 +8,8 @@
 """
 import sys
 
+from trytond.config import CONFIG
+from trytond.modules import register_classes
 from trytond.pool import Pool
 from trytond.transaction import Transaction
 
@@ -24,18 +26,26 @@ if __name__ == '__main__':
     if len(args) != 3:
         parser.error("Expected 3 argument got %d" % len(args))
 
+    if options.config:
+        CONFIG.configfile = options.config
+        CONFIG.load()
+
+    regsiter_classes()
     pool = Pool(args[0])
     pool.init()
 
-    with Transaction().start(args[0], args[1], None):
+    with Transaction().start(args[0], 0, None):
         user_obj = pool.get('res.user')
         search_model_obj = pool.get('search.model')
         ir_date_obj = pool.get('ir.date')
 
-        # Load the context of the user so that language and company settings are
-        # automatically available
-        context = user_obj.get_preferences(True)
+        user_id, = user_obj.search([('login', '=', args[1])])
+        with Transaction().set_user(user_id):
+            # Load the context of the user so that language and company 
+            # settings are automatically available
+            context = user_obj.get_preferences(True)
 
+    with Transaction().start(args[0], user_id, context):
         indexed_model = search_model_obj.search(
                 [('model.model', '=', args[2])])
         model = search_model_obj.browse(indexed_model)

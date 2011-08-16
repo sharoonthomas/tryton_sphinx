@@ -9,8 +9,8 @@ class Model(ModelSQL, ModelView):
     _description = __doc__
     _inherits = {'ir.model': 'model'}
 
-    model = fields.Many2One('ir.model', 'Model', required=True)
-    last_updated = fields.DateTime('Last Updated', readonly=True)
+    model = fields.Many2One('ir.model', 'Model', required=True, select=1)
+    last_updated = fields.DateTime('Last Updated', readonly=True, select=1)
 
     def __init__(self):
         super(Model, self).__init__()
@@ -34,7 +34,7 @@ class KillList(ModelSQL, ModelView):
     _name = "search.kill_list"
     _description = __doc__
 
-    model = fields.Many2One('search.model', 'Model', readonly=True)
+    model = fields.Many2One('search.model', 'Model', readonly=True, select=1)
     record_id = fields.Integer('Record ID', readonly=True)
 
 KillList()

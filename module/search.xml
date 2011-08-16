@@ -71,5 +71,7 @@ this repository contains the full copyright notices and license terms. -->
             <field name="view" ref="kill_list_view_tree"/>
             <field name="act_window" ref="act_kill_list_tree"/>
         </record>
+        <menuitem parent="menu_search"
+            action="act_kill_list_tree" id="menu_search_kill_list"/>
     </data>
 </tryton>

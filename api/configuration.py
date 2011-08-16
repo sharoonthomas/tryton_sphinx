@@ -62,7 +62,7 @@ class BaseSQLSource(object):
 
         self.sql_user = CONFIG.options['db_user']
         self.sql_pass = CONFIG.options['db_password']
-        
+
         self.sql_db = database_name
 
         return self
@@ -115,22 +115,22 @@ class SQLDataSource(object):
     The possible arguments are:
 
     `name`: Name of a data source. (needs to be unique)
-            .. tip:: 
-                the best way seems to be to resuse the _table attribute of 
-                tryton which is guaranteed to exists and be unique for every 
-                model that has a database representation (in other words every 
+            .. tip::
+                the best way seems to be to resuse the _table attribute of
+                tryton which is guaranteed to exists and be unique for every
+                model that has a database representation (in other words every
                 object other than wizards and reports)
 
-    `sql_query`: The main document fetch query. 
+    `sql_query`: The main document fetch query.
     `attributes`: A :class:`dict` of field names as keys and type as values
                   eg {'name': 'sql_field_string'}
-    `sql_query_range` : Range query setup, query that must return min and max 
+    `sql_query_range` : Range query setup, query that must return min and max
                         ID values optional, default is empty
     `sql_range_step`: Range query step (Default: 1024)
     """
 
 
-    def __init__(self, name, sql_query, attributes, 
+    def __init__(self, name, sql_query, attributes,
             sql_query_range=None, sql_range_step=1024):
         self.name = name
         self.sql_query = sql_query
@@ -168,7 +168,7 @@ class SQLDataSource(object):
         sql_query = ""
         sql_query_range = 'SELECT MIN(id),MAX(id) FROM "%s"' \
             % model_object._table
- 
+
         if attributes:
             # Construct the SQL query if attributes do exist
             sql_query = ['SELECT "%s"."id" AS "id",' % model_object._table]

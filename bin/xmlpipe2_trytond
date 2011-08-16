@@ -46,7 +46,7 @@ if __name__ == '__main__':
             context = user_obj.get_preferences(True)
 
     with Transaction().start(args[0], user_id, context):
-        indexed_model = search_model_obj.search(
+        indexed_model, = search_model_obj.search(
                 [('model.model', '=', args[2])])
         model = search_model_obj.browse(indexed_model)
         with Transaction().new_cursor() as transaction:

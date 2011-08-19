@@ -37,7 +37,6 @@ if __name__ == '__main__':
     with Transaction().start(args[0], 0, None):
         user_obj = pool.get('res.user')
         search_model_obj = pool.get('search.model')
-        ir_date_obj = pool.get('ir.date')
 
         user_id, = user_obj.search([('login', '=', args[1])])
         with Transaction().set_user(user_id):
@@ -48,20 +47,4 @@ if __name__ == '__main__':
     with Transaction().start(args[0], user_id, context):
         indexed_model, = search_model_obj.search(
                 [('model.model', '=', args[2])])
-        model = search_model_obj.browse(indexed_model)
-        with Transaction().new_cursor() as transaction:
-            # Execute in a different Transaction so that changes being too
-            # long does not result in stale records and locks
-            timestamp = datetime.today()
-
-            stream = sys.stdout
-            stream.write('<?xml version="1.0" encoding="utf-8"?>')
-            stream.write("<sphinx:docset>")
-            stream_new_records(pool, model, stream)
-            stream_kill_list(pool, model, stream)
-            stream.write("</sphinx:docset>")
-
-            search_model_obj.write(
-                model.id, {'last_updated': timestamp}
-            )
-            transaction.cursor.commit()
+        search_model_obj.stream_xml(indexed_model, sys.stdout)

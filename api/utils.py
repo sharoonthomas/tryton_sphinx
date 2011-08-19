@@ -9,7 +9,7 @@
 """
 from trytond.model import ModelSQL
 from trytond.model.fields import (Integer, BigInteger, Boolean, DateTime,
-    Numeric, Float, Char, Text, Selection)
+    Numeric, Float, Char, Text, Selection, Function)
 
 
 def guess_type(field):
@@ -45,6 +45,11 @@ def guess_xml_type(field):
     """The function checks the field's types and decided the best possible xml
     data type to use
     """
+    if isinstance(field, Function):
+        # Function fields wrap a simple field which is available in attribute
+        # _field of the class
+        return guess_xml_type(field._field)
+
     if isinstance(field, (Integer, BigInteger)):
         # Even the integer field in python could go beyond what could be com-
         # prehended by sphinx. So safer to use Big Int

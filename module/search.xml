@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<!-- This file is part of Tryton.  The COPYRIGHT file at the top level of
+this repository contains the full copyright notices and license terms. -->
+<tryton>
+    <data>
+        <menuitem parent="ir.menu_administration"
+            name="Search" id="menu_search"/>
+
+        <record model="ir.ui.view" id="model_view_form">
+            <field name="model">search.model</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <![CDATA[
+                <form string="Model">
+                    <label name="model"/>
+                    <field name="model"/>
+                    <label name="last_updated"/>
+                    <field name="last_updated"/>
+                </form>
+                ]]>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="model_view_tree">
+            <field name="model">search.model</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <![CDATA[
+                <tree string="Models">
+                    <field name="model"/>
+                    <field name="last_updated"/>
+                </tree>
+                ]]>
+            </field>
+        </record>
+        <record model="ir.action.act_window" id="act_model_tree">
+            <field name="name">Models</field>
+            <field name="res_model">search.model</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_model_tree_view1">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="model_view_tree"/>
+            <field name="act_window" ref="act_model_tree"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_model_tree_view2">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="model_view_form"/>
+            <field name="act_window" ref="act_model_tree"/>
+        </record>
+        
+        <menuitem parent="menu_search"
+            action="act_model_tree" id="menu_search_model"/>
+
+	    <record model="ir.ui.view" id="kill_list_view_tree">
+	        <field name="model">search.kill_list</field>
+	        <field name="type">tree</field>
+	        <field name="arch" type="xml">
+                <![CDATA[
+                <tree string="Kill List">
+                    <field name="model"/>
+                    <field name="record_list"/>
+                </tree>
+                ]]>
+	        </field>
+	    </record>
+        <record model="ir.action.act_window" id="act_kill_list_tree">
+            <field name="name">Kill List</field>
+            <field name="res_model">search.kill_list</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_kill_list_tree_view">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="kill_list_view_tree"/>
+            <field name="act_window" ref="act_kill_list_tree"/>
+        </record>
+        <menuitem parent="menu_search"
+            action="act_kill_list_tree" id="menu_search_kill_list"/>
+    </data>
+</tryton>

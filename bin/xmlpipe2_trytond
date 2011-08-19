@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+    xmlpipe builder for streaming trytond records for indexing
+
+    :copyright: (c) 2011 by Douglas Morato
+    :license: BSD, see LICENSE for more details.
+"""
+import sys
+from datetime import datetime
+from trytond.config import CONFIG
+from trytond.modules import register_classes
+from trytond.pool import Pool
+from trytond.transaction import Transaction
+
+from tryton_sphinx.utils import stream_new_records, stream_kill_list
+
+if __name__ == '__main__':
+    from optparse import OptionParser
+    usage = "usage: %prog [options] database user model"
+    parser = OptionParser(usage=usage)
+    parser.add_option('-c', '--config', dest="config",
+        default=None, help="The tryton configuration file to use")
+    (options, args) = parser.parse_args()
+
+    if len(args) != 3:
+        parser.error("Expected 3 argument got %d" % len(args))
+
+    if options.config:
+        CONFIG.configfile = options.config
+        CONFIG.load()
+
+    register_classes()
+    pool = Pool(args[0])
+    pool.init()
+
+    with Transaction().start(args[0], 0, None):
+        user_obj = pool.get('res.user')
+        search_model_obj = pool.get('search.model')
+
+        user_id, = user_obj.search([('login', '=', args[1])])
+        with Transaction().set_user(user_id):
+            # Load the context of the user so that language and company 
+            # settings are automatically available
+            context = user_obj.get_preferences(True)
+
+    with Transaction().start(args[0], user_id, context):
+        indexed_model, = search_model_obj.search(
+                [('model.model', '=', args[2])])
+        search_model_obj.stream_xml(indexed_model, sys.stdout)

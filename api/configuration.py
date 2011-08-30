@@ -55,7 +55,7 @@ class XMLSource(object):
             database_name,
             user,
             model_object._name)
-        return cls(model_object._table, command, languages)
+        return cls(model_object._table, command, languages=languages)
 
     def as_string(self):
         """Returns the string representation of the confis as it has to appear

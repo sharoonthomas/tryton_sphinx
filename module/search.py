@@ -44,7 +44,8 @@ class Model(ModelSQL, ModelView):
             "model": values["model"],
             "on_delete": True,
             "action_model": search_model_id,
-            "action_function": "add_to_kill_list"
+            "action_function": "add_to_kill_list",
+            "condition": "True",
         })
         return super(Model, self).create(values)
 

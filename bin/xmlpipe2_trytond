@@ -7,20 +7,21 @@
     :license: BSD, see LICENSE for more details.
 """
 import sys
-from datetime import datetime
+from optparse import OptionParser
+
 from trytond.config import CONFIG
 from trytond.modules import register_classes
 from trytond.pool import Pool
 from trytond.transaction import Transaction
 
-from tryton_sphinx.utils import stream_new_records, stream_kill_list
 
 if __name__ == '__main__':
-    from optparse import OptionParser
     usage = "usage: %prog [options] database user model"
     parser = OptionParser(usage=usage)
     parser.add_option('-c', '--config', dest="config",
         default=None, help="The tryton configuration file to use")
+    parser.add_option('-l', '--language', dest="language",
+        default=None, help="The langauge for indexing")
     (options, args) = parser.parse_args()
 
     if len(args) != 3:
@@ -43,6 +44,10 @@ if __name__ == '__main__':
             # Load the context of the user so that language and company 
             # settings are automatically available
             context = user_obj.get_preferences(True)
+
+    if options.language:
+        # If a language is defined override the user preferred 
+        context['language'] = options.language
 
     with Transaction().start(args[0], user_id, context):
         indexed_model, = search_model_obj.search(

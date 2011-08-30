@@ -27,18 +27,22 @@ class XMLSource(object):
                        values eg. {'name': 'xmlpipe_attr_uint'}
     """
     fields = []
+    languages = []
     attributes = dict()
 
-    def __init__(self, name, command, fields=None, attributes=None):
+    def __init__(self, name, command,
+            fields=None, attributes=None, languages=None):
         self.name = name
         self.command = command
         if fields is not None:
             self.fields = fields
         if attributes is not None:
             self.attributes = attributes
+        if languages is not None:
+            self.languages = languages
 
     @classmethod
-    def from_model(cls, database_name, user, model_object):
+    def from_model(cls, database_name, user, model_object, languages):
         """Creates and returns an XMLPIPE2 data source
 
         :param database_name: The name of tryton database to index data from
@@ -46,7 +50,6 @@ class XMLSource(object):
                           `trytond.pool.Pool`
         """
         # TODO: Morphology
-        # TODO: An indexer for each language ???
         command = 'xmlpipe2_trytond -c %s %s %s %s' % (
             os.path.abspath(CONFIG.configfile),
             database_name,
@@ -58,10 +61,11 @@ class XMLSource(object):
         """Returns the string representation of the confis as it has to appear
         in the sphinx config"""
         template = Environment().from_string("""
-source {{cls.name}}
+{% for language in cls.languages %}
+source {{cls.name}}_{{ language }}
 {
     type                =   xmlpipe
-    xmlpipe_command     =   {{ cls.command }}
+    xmlpipe_command     =   {{ cls.command }} -l {{ language }}
 
     {% for attr_name, attr_type in cls.attributes %}
     {{ attr_type }}     =   {{ attr_name }}
@@ -72,11 +76,13 @@ source {{cls.name}}
     {% endfor %}
 }
 
-index {{cls.name}}
+index {{cls.name}}_{{ language }}
 {
-    source              =   {{ cls.name }}
+    source              =   {{ cls.name }}_{{ language }}
     path                =   {{config.options['data_path']}}/sphinx/{{cls.name}}
 }
+
+{% endfor %}
         """)
         return template.render(cls=self, config=CONFIG)
 

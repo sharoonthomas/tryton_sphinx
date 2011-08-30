@@ -1,6 +1,9 @@
 # This file is part of Tryton.  The COPYRIGHT file at the top level of
 # this repository contains the full copyright notices and license terms.
+from datetime import datetime
+
 from trytond.model import ModelSQL, ModelView, fields
+from trytond.transaction import Transaction
 
 from tryton_sphinx.utils import guess_xml_type
 
@@ -14,6 +17,13 @@ class Model(ModelSQL, ModelView):
     model = fields.Many2One('ir.model', 'Model', required=True, select=1)
     last_updated = fields.DateTime('Last Updated', readonly=True, select=1)
 
+    #: A trigger is created which automatically adds a record being deleted to
+    #: the kill list. It is important to store the reference to the trigger
+    #: so that it can be deleted if the model is ever removed from full text
+    #: search indexing.
+    delete_trigger = fields.Many2One('ir.trigger', 'On Delete Trigger', 
+        readonly=True)
+
     def __init__(self):
         super(Model, self).__init__()
         self._sql_constraints.append(
@@ -21,12 +31,56 @@ class Model(ModelSQL, ModelView):
             )
 
     def create(self, values):
-        # TODO: Create a trigger
+        """Override to create a :attr:`delete_trigger` automatically when a
+        model is added to `search.model`s
+        """
+        trigger_obj = self.pool.get("ir.trigger")
+        model_obj = self.pool.get("ir.model")
+
+        search_model_id, = model_obj.search([("model", "=", self._name)])
+
+        values['delte_trigger'] = trigger_obj.create({
+            "name": "Search Kill List",
+            "model": values["model"],
+            "on_delete": True,
+            "action_model": search_model_id,
+            "action_function": "add_to_kill_list"
+        })
         return super(Model, self).create(values)
 
     def delete(self, ids):
-        # TODO: Delete the trigger created in :meth:`create`
+        """Delete the :attr:`delete_trigger` of the record also when the 
+        record is deleted
+        """
+        trigger_obj = self.pool.get("ir.trigger")
+
+        triggers = [record.delete_trigger.id for record in self.browse(ids)]
+        trigger_obj.delete(triggers)
+
         return super(Model, self).delete(ids)
+
+    def add_to_kill_list(self, deleted_rec_ids, trigger_id):
+        """Add the `deleted_rec_ids` to the `search.kill_list` model
+
+        .. admonition::
+
+            The calling trigger must be the automatically generated trigger
+            function and not a user created one because any such trigger_id 
+            cannot be matched to a `search.model` record
+
+        :param deleted_rec_ids: A list of IDS of the records that have been
+                                deleted
+        :param trigger_id: The ID of the trigger which triggered this call
+        """
+        kill_list_obj = self.pool.get("search.kill_list")
+
+        search_model_id, = self.search([('delete_trigger', '=', trigger_id)])
+        search_model = self.browse(search_model_id)
+        for record_id in deleted_rec_ids:
+            kill_list_obj.create({
+                'model': search_model.model.id,
+                'record_id': record_id,
+                })
 
     def stream_new_records(self, model, stream):
         """Writes XML documents of all the new records after the last udpate of
@@ -61,7 +115,8 @@ class Model(ModelSQL, ModelView):
         fields = attributes.keys()
 
         clause = []
-        if search_model.last_updated:
+        if model.last_updated:
+            #: If there is a last_updated date then pick up records
             clause = [
                 'OR',
                 ('create_date', '>=', model.last_updated),
@@ -69,8 +124,8 @@ class Model(ModelSQL, ModelView):
             ]
 
         # TODO: Handle some kind of pagination here
-        ids = model_obj.search(clause)
-        for record in model_obj.browse(ids):
+        ids = model_object.search(clause)
+        for record in model_object.browse(ids):
             stream.write('<sphinx:document id="%d">' % record.id)
             for field in fields:
                 stream.write(

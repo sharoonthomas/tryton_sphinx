@@ -39,7 +39,7 @@ class Model(ModelSQL, ModelView):
 
         search_model_id, = model_obj.search([("model", "=", self._name)])
 
-        values['delte_trigger'] = trigger_obj.create({
+        values['delete_trigger'] = trigger_obj.create({
             "name": "Search Kill List",
             "model": values["model"],
             "on_delete": True,

@@ -177,13 +177,18 @@ class Model(ModelSQL, ModelView):
         record_count = model_object.search(clause, count=True)
         for batch_start in xrange(0, record_count, 100):
             ids = model_object.search(clause, offset=batch_start, limit=100)
-            for record in model_object.browse(ids):
-                stream.write(u'<sphinx:document id="%d">' % record.id)
-                for field in fields:
-                    stream.write(
-                        u'<%s>%s</%s>' % (field, getattr(record, field), field)
-                    )
-                stream.write(u'</sphinx:document>')
+            with Transaction().new_cursor() as txn:
+                records = model_object.browse(ids)
+                for record in records:
+                    stream.write(u'<sphinx:document id="%d">' % record.id)
+                    for field in fields:
+                        stream.write(
+                            u'<%s>%s</%s>' % (
+                                field, getattr(record, field), field)
+                        )
+                    stream.write(u'</sphinx:document>')
+                txn.cursor.rollback()
+            del records
 
     def stream_kill_list(self, model, stream):
         """Writes to the stream the list of records to kill

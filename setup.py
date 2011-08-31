@@ -59,7 +59,7 @@ setup(
     package_dir = package_dir,
     package_data = package_data,
     scripts = [
-        'bin/tryton-sphinx-buildconf.py',
+        'bin/tryton-sphinx-buildconf',
         'bin/xmlpipe2_trytond',
     ],
 

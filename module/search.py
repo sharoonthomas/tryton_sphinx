@@ -144,6 +144,14 @@ class Model(ModelSQL, ModelView):
             except ValueError:
                 continue
 
+        for name, field in model_object._inherit_fields.iteritems():
+            if not field.select:
+                continue
+            try:
+                attributes[name] = guess_xml_type(field)
+            except ValueError:
+                continue
+
         # Send the schema first
         stream.write("<sphinx:schema>")
         for name, type in attributes.iteritems():

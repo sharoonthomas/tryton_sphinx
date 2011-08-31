@@ -144,7 +144,8 @@ class Model(ModelSQL, ModelView):
             except ValueError:
                 continue
 
-        for name, field in model_object._inherit_fields.iteritems():
+        for name, field_tuple in model_object._inherit_fields.iteritems():
+            field = field_tuple[2]
             if not field.select:
                 continue
             try:

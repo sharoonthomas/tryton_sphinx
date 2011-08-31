@@ -80,6 +80,7 @@ index {{cls.name}}_{{ language }}
 {
     source              =   {{ cls.name }}_{{ language }}
     path                =   {{config.options['data_path']}}/sphinx/{{cls.name}}
+    charset_type        =   utf-8
 }
 
 {% endfor %}

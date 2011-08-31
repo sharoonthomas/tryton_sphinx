@@ -16,6 +16,7 @@ this repository contains the full copyright notices and license terms. -->
                     <field name="model"/>
                     <label name="last_updated"/>
                     <field name="last_updated"/>
+                    <field name="update_records" colspan="4"/>
                 </form>
                 ]]>
             </field>
@@ -50,18 +51,18 @@ this repository contains the full copyright notices and license terms. -->
         <menuitem parent="menu_search"
             action="act_model_tree" id="menu_search_model"/>
 
-	    <record model="ir.ui.view" id="kill_list_view_tree">
+	      <record model="ir.ui.view" id="kill_list_view_tree">
 	        <field name="model">search.kill_list</field>
 	        <field name="type">tree</field>
 	        <field name="arch" type="xml">
                 <![CDATA[
                 <tree string="Kill List">
                     <field name="model"/>
-                    <field name="record_list"/>
+                    <field name="record_id"/>
                 </tree>
                 ]]>
 	        </field>
-	    </record>
+	      </record>
         <record model="ir.action.act_window" id="act_kill_list_tree">
             <field name="name">Kill List</field>
             <field name="res_model">search.kill_list</field>
@@ -73,5 +74,19 @@ this repository contains the full copyright notices and license terms. -->
         </record>
         <menuitem parent="menu_search"
             action="act_kill_list_tree" id="menu_search_kill_list"/>
+
+        <record model="ir.ui.view" id="model_update_view_tree">
+            <field name="model">search.model.update</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <![CDATA[
+                <tree string="Model Update Status">
+                    <field name="search_model"/>
+                    <field name="language"/>
+                    <field name="date"/>
+                </tree>
+                ]]>
+            </field>
+        </record>
     </data>
 </tryton>

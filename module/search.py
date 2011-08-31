@@ -29,6 +29,10 @@ class Model(ModelSQL, ModelView):
     delete_trigger = fields.Many2One(
         'ir.trigger', 'On Delete Trigger', readonly=True)
 
+    update_records = fields.One2Many(
+        'search.model.update', 'search_model', 'Last update status', 
+        readonly=True)
+
     def __init__(self):
         super(Model, self).__init__()
         self._sql_constraints.append(

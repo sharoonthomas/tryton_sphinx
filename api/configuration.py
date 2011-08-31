@@ -79,7 +79,7 @@ source {{cls.name}}_{{ language }}
 index {{cls.name}}_{{ language }}
 {
     source              =   {{ cls.name }}_{{ language }}
-    path                =   {{config.options['data_path']}}/sphinx/{{cls.name}}
+    path                =   {{ config.options['data_path'] }}/sphinx/{{cls.name}}_{{ language }}
     charset_type        =   utf-8
 }
 

@@ -15,20 +15,59 @@ class Model(ModelSQL, ModelView):
     _inherits = {'ir.model': 'model'}
 
     model = fields.Many2One('ir.model', 'Model', required=True, select=1)
-    last_updated = fields.DateTime('Last Updated', readonly=True, select=1)
+
+    #: The last updated date time is dependent on the current language
+    last_updated = fields.Function(
+        fields.DateTime('Last Updated'),
+        'get_last_updated', setter='set_last_updated'
+        )
 
     #: A trigger is created which automatically adds a record being deleted to
     #: the kill list. It is important to store the reference to the trigger
     #: so that it can be deleted if the model is ever removed from full text
     #: search indexing.
-    delete_trigger = fields.Many2One('ir.trigger', 'On Delete Trigger', 
-        readonly=True)
+    delete_trigger = fields.Many2One(
+        'ir.trigger', 'On Delete Trigger', readonly=True)
 
     def __init__(self):
         super(Model, self).__init__()
         self._sql_constraints.append(
             ('unique_model', 'UNIQUE(model)', 'Model already added to indexes')
             )
+
+    def get_last_updated(self, ids, name):
+        """Lookup the last_updated date based on the language and return that
+        """
+        model_update_obj = self.pool.get('search.model.update')
+
+        result = {}.fromkeys(ids, False)
+        for model_id in ids:
+            rec_ids = model_update_obj.search([
+                ('search_model', '=', model_id),
+                ('language', '=', Transaction().language)
+            ])
+            if ids:
+                result[model_id] = model_update_obj.browse(ids[0]).date
+        return result
+
+    def set_last_updated(self, ids, name, value):
+        """Set the last_updated date based on language
+        """
+        model_update_obj = self.pool.get('search.model.update')
+
+        for model_id in ids:
+            rec_ids = model_update_obj.search([
+                    ('search_model', '=', model_id),
+                    ('language', '=', Transaction().language)
+                ])
+            if rec_ids:
+                model_update_obj.write(rec_ids, {'date': value})
+            else:
+                model_update_obj.create({
+                    'date': value,
+                    'search_model': model_id,
+                    })
+        return True
 
     def create(self, values):
         """Override to create a :attr:`delete_trigger` automatically when a
@@ -180,6 +219,27 @@ class Model(ModelSQL, ModelView):
             transaction.cursor.commit()
 
 Model()
+
+
+class ModelUpdate(ModelSQL, ModelView):
+    """Search Model Update records"""
+    _name = 'search.model.update'
+
+    search_model = fields.Many2One(
+        'search.model', 'Search Model', required=True, readonly=True)
+    date = fields.DateTime('Date', required=True, readonly=True)
+    language = fields.Char('Language code', required=True, size=5)
+
+    def __init__(self):
+        super(ModelUpdate, self).__init__()
+        self._sql_constraints.append(
+            ('unique_model_language', 
+             'UNIQUE(model, language)', 
+             'Model/Language pair already exists')
+            )
+
+
+ModelUpdate()
 
 
 class KillList(ModelSQL, ModelView):

@@ -46,8 +46,8 @@ class Model(ModelSQL, ModelView):
                 ('search_model', '=', model_id),
                 ('language', '=', Transaction().language)
             ])
-            if ids:
-                result[model_id] = model_update_obj.browse(ids[0]).date
+            if rec_ids:
+                result[model_id] = model_update_obj.browse(rec_ids[0]).date
         return result
 
     def set_last_updated(self, ids, name, value):

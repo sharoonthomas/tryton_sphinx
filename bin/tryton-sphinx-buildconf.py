@@ -337,9 +337,13 @@ if __name__ == '__main__':
 
         if options.source_type == 'xmlpipe':
             with Transaction().start(args[0], 0, None):
+
                 lang_obj = pool.get('ir.lang')
                 lang_ids = lang_obj.search([('translatable', '=', True)])
                 languages = [lang.code for lang in lang_obj.browse(lang_ids)]
+                if 'en_US' not in languages:
+                    languages.isert(0, 'en_US')
+
                 for model_object in iter_search_models(pool):
                     ds = XMLSource.from_model(
                         args[0], options.user, model_object, languages)

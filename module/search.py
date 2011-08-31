@@ -234,7 +234,7 @@ class ModelUpdate(ModelSQL, ModelView):
         super(ModelUpdate, self).__init__()
         self._sql_constraints.append(
             ('unique_model_language', 
-             'UNIQUE(model, language)', 
+             'UNIQUE(search_model, language)', 
              'Model/Language pair already exists')
             )
 

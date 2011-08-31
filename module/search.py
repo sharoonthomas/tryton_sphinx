@@ -115,10 +115,9 @@ class Model(ModelSQL, ModelView):
         kill_list_obj = self.pool.get("search.kill_list")
 
         search_model_id, = self.search([('delete_trigger', '=', trigger_id)])
-        search_model = self.browse(search_model_id)
         for record_id in deleted_rec_ids:
             kill_list_obj.create({
-                'model': search_model.model.id,
+                'model': search_model_id,
                 'record_id': record_id,
                 })
 

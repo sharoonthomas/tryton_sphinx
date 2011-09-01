@@ -6,6 +6,7 @@
     :copyright: (c) 2011 by Douglas Morato
     :license: BSD, see LICENSE for more details.
 """
+import os
 import sys
 from optparse import OptionParser
 
@@ -13,6 +14,29 @@ from trytond.config import CONFIG
 from trytond.modules import register_classes
 from trytond.pool import Pool
 from trytond.transaction import Transaction
+
+
+class UnbufferedUTF8(object):
+    """
+    A stream with the following chars:
+
+    1. Unbuffered
+    2. Encodes as UTF-8
+    3. Streams to STDOUT
+    """
+    def __init__(self):
+        self.stream = os.fdopen(sys.stdout.fileno(), 'w', 0)
+
+    def write(self, data):
+        try:
+            encoded_data = data.encode('utf-8')
+        except Exception, exc:
+            sys.stderr.write(unicode(exc))
+        else:
+            self.stream.write(encoded_data)
+
+    def __getattr__(self, attribute):
+        return getattr(self.stream, attribute)
 
 
 if __name__ == '__main__':
@@ -52,4 +76,4 @@ if __name__ == '__main__':
     with Transaction().start(args[0], user_id, context):
         indexed_model, = search_model_obj.search(
                 [('model.model', '=', args[2])])
-        search_model_obj.stream_xml(indexed_model, sys.stdout)
+        search_model_obj.stream_xml(indexed_model, UnbufferedUTF8())

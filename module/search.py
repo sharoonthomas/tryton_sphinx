@@ -1,6 +1,8 @@
 # This file is part of Tryton.  The COPYRIGHT file at the top level of
 # this repository contains the full copyright notices and license terms.
+import sys
 from datetime import datetime
+from xml.sax.saxutils import escape
 
 from trytond.model import ModelSQL, ModelView, fields
 from trytond.transaction import Transaction
@@ -70,6 +72,7 @@ class Model(ModelSQL, ModelView):
                 model_update_obj.create({
                     'date': value,
                     'search_model': model_id,
+                    'language': Transaction().language
                     })
         return True
 
@@ -176,8 +179,11 @@ class Model(ModelSQL, ModelView):
             ]
 
         record_count = model_object.search(clause, count=True)
-        for batch_start in xrange(0, record_count, 100):
-            ids = model_object.search(clause, offset=batch_start, limit=100)
+        batch_size = 200
+        for batch_start in xrange(0, record_count, batch_size):
+            sys.stderr.write("Batch %d\n" % ((batch_start / batch_size) +1))
+            ids = model_object.search(
+                clause, offset=batch_start, limit=batch_size)
             with Transaction().new_cursor() as txn:
                 records = model_object.browse(ids)
                 for record in records:
@@ -185,7 +191,9 @@ class Model(ModelSQL, ModelView):
                     for field in fields:
                         stream.write(
                             u'<%s>%s</%s>' % (
-                                field, getattr(record, field), field)
+                                field,
+                                escape(unicode(getattr(record, field))),
+                                field)
                         )
                     stream.write(u'</sphinx:document>')
                 txn.cursor.rollback()

@@ -178,12 +178,17 @@ class Model(ModelSQL, ModelView):
                 ('write_date', '>=', model.last_updated),
             ]
 
-        record_count = model_object.search(clause, count=True)
+        min = model_object.search(clause, order=[('id', 'ASC')], limit=1)
+        max = model_object.search(clause, order=[('id', 'DESC')], limit=1)
+
         batch_size = 200
-        for batch_start in xrange(0, record_count, batch_size):
-            sys.stderr.write("Batch %d\n" % ((batch_start / batch_size) +1))
-            ids = model_object.search(
-                clause, offset=batch_start, limit=batch_size)
+        for batch, batch_start in enumerate(xrange(min, max, batch_size), 1):
+            sys.stderr.write("Batch %d\n" % batch)
+            domain = [
+                ('id', '>', batch_start), 
+                ('id', '<=', batch_start + batch_size)
+                ] + clause
+            ids = model_object.search(domain)
             with Transaction().new_cursor() as txn:
                 records = model_object.browse(ids)
                 for record in records:

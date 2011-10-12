@@ -292,7 +292,7 @@ searchd
 
 if __name__ == '__main__':
     from optparse import OptionParser
-    usage = "usage: %prog [options] database filename"
+    usage = "usage: %prog [options] database configfile shfile"
     parser = OptionParser(usage=usage)
     parser.add_option('-u', '--user', dest="user",
         default='admin', help="The user to be used")
@@ -305,8 +305,8 @@ if __name__ == '__main__':
         default='xmlpipe', help="Type of the source to use (sql|xmlpipe)")
     (options, args) = parser.parse_args()
 
-    if len(args) != 2:
-        parser.error("Expected 2 argument got %d" % len(args))
+    if len(args) != 3:
+        parser.error("Expected 3 argument got %d" % len(args))
 
     if options.config is not None:
         from trytond.config import CONFIG
@@ -348,6 +348,7 @@ if __name__ == '__main__':
                     ds = XMLSource.from_model(
                         args[0], options.user, model_object, languages)
                     file.write(ds.as_string())
+                    file.write(ds.as_string(delta=True))
 
         file.write(INDEXER_SETTINGS)
         file.write(SEARCHD_SETTINGS)

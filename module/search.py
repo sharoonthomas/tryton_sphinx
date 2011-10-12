@@ -170,25 +170,37 @@ class Model(ModelSQL, ModelView):
         fields = attributes.keys()
 
         clause = []
-        if model.last_updated:
-            #: If there is a last_updated date then pick up records
-            clause = [
-                'OR',
-                ('create_date', '>=', model.last_updated),
-                ('write_date', '>=', model.last_updated),
-            ]
+        if Transaction().context.get('delta', False):
+            sys.stderr.write("Delta index clause to be built\n")
+	    if model.last_updated:
+                #: If there is a last_updated date then pick up records
+	        clause = [
+			'OR',
+			('create_date', '>=', model.last_updated),
+			('write_date', '>=', model.last_updated),
+		    ]
 
-        min = model_object.search(clause, order=[('id', 'ASC')], limit=1)
-        max = model_object.search(clause, order=[('id', 'DESC')], limit=1)
+	min_id = model_object.search(clause, order=[('id', 'ASC')], limit=1)
+	max_id = model_object.search(clause, order=[('id', 'DESC')], limit=1)
+	min_id = min_id[0] if min_id else 0
+	max_id = max_id[0] if max_id else 0
+
+        sys.stderr.write("ID Range: %d-%d\n" % (min_id, max_id))
 
         batch_size = 200
-        for batch, batch_start in enumerate(xrange(min, max, batch_size), 1):
+        for batch, batch_start in enumerate(xrange(min_id, max_id + 1, batch_size), 1):
+            batch_end = min([batch_start + batch_size, max_id])
             sys.stderr.write("Batch %d\n" % batch)
-            domain = [
-                ('id', '>', batch_start), 
-                ('id', '<=', batch_start + batch_size)
+            if batch_start == batch_end:
+                domain = [('id', '=', batch_start)]
+            else:
+                domain = [
+                    ('id', '>', batch_start), 
+                    ('id', '<=', min([batch_start + batch_size, max_id])),
                 ] + clause
+            sys.stderr.write(str(domain))
             ids = model_object.search(domain)
+            sys.stderr.write("Ids: %s" % ids)
             with Transaction().new_cursor() as txn:
                 records = model_object.browse(ids)
                 for record in records:

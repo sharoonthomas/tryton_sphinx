@@ -46,6 +46,8 @@ if __name__ == '__main__':
         default=None, help="The tryton configuration file to use")
     parser.add_option('-l', '--language', dest="language",
         default=None, help="The langauge for indexing")
+    parser.add_option('-d', '--delta', dest="delta", action="store_true",
+        default=None, help="Returns only the delta of changed records")
     (options, args) = parser.parse_args()
 
     if len(args) != 3:
@@ -72,6 +74,9 @@ if __name__ == '__main__':
     if options.language:
         # If a language is defined override the user preferred 
         context['language'] = options.language
+    if options.delta:
+        # If only a delta is required
+        context['delta'] = True
 
     with Transaction().start(args[0], user_id, context):
         indexed_model, = search_model_obj.search(

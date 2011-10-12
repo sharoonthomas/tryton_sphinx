@@ -57,15 +57,27 @@ class XMLSource(object):
             model_object._name)
         return cls(model_object._table, command, languages=languages)
 
-    def as_string(self):
+    def get_sphinx_name(self, langauge, delta=False):
+        if delta:
+            return '%s_%s_delta' % (self.name, language)
+        return '%s_%s' % (self.name, language)
+
+    def get_sphinx_names(self, delta=False):
+        return [self.get_sphinx_name(l, delta) for l in self.languages]
+
+    def as_string(self, delta=False):
         """Returns the string representation of the confis as it has to appear
         in the sphinx config"""
         template = Environment().from_string("""
 {% for language in cls.languages %}
+{% if delta %}
+source {{cls.name}}_{{ language }}_delta : {{cls.name}}_{{ language }}
+{% else %}
 source {{cls.name}}_{{ language }}
+{% endif %}
 {
     type                =   xmlpipe
-    xmlpipe_command     =   {{ cls.command }} -l {{ language }}
+    xmlpipe_command     =   {{ cls.command }} -l {{ language }} {% if delta %}-d{% endif %}
 
     {% for attr_name, attr_type in cls.attributes %}
     {{ attr_type }}     =   {{ attr_name }}
@@ -76,16 +88,20 @@ source {{cls.name}}_{{ language }}
     {% endfor %}
 }
 
+{% if delta %}
+index {{cls.name}}_{{ language }}_delta : {{cls.name}}_{{ language }}
+{% else %}
 index {{cls.name}}_{{ language }}
+{% endif %}
 {
-    source              =   {{ cls.name }}_{{ language }}
-    path                =   {{ config.options['data_path'] }}/sphinx/{{cls.name}}_{{ language }}
+    source              =   {{ cls.name }}_{{ language }}{% if delta %}_delta{% endif %}
+    path                =   {{ config.options['data_path'] }}/sphinx/{{cls.name}}_{{ language }}{% if delta %}_delta{% endif %}
     charset_type        =   utf-8
 }
 
 {% endfor %}
         """)
-        return template.render(cls=self, config=CONFIG)
+        return template.render(cls=self, config=CONFIG, delta=delta)
 
 
 class BaseSQLSource(object):

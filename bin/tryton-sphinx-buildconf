@@ -9,6 +9,7 @@
     :copyright: (c) 2011 by Douglas Morato
     :license: BSD, see LICENSE for more details.
 """
+from contextlib import nested
 from tryton_sphinx import BaseSQLSource, SQLDataSource, XMLSource
 from tryton_sphinx.utils import iter_sql_models, iter_search_models
 
@@ -322,18 +323,17 @@ if __name__ == '__main__':
     pool = Pool(args[0])
     pool.init()
 
-    with open(args[1], 'wb') as file:
-
+    with nested(open(args[1], 'wb'), open(args[2], 'wb')) as (configfile, shfile):
         if options.source_type == 'sql':
             base_source = BaseSQLSource.from_tryton_config(args[0])
-            file.write(base_source.as_string())
+            configfile.write(base_source.as_string())
             for model_object in iter_sql_models(pool):
                 ds = SQLDataSource.from_model(model_object, base_source)
                 if not ds.sql_query:
                     # If there are no attributes which have select=1 then there
                     # will be no sql query, so just ignore those data sources
                     continue
-                file.write(ds.as_string())
+                configfile.write(ds.as_string())
 
         if options.source_type == 'xmlpipe':
             with Transaction().start(args[0], 0, None):
@@ -347,8 +347,10 @@ if __name__ == '__main__':
                 for model_object in iter_search_models(pool):
                     ds = XMLSource.from_model(
                         args[0], options.user, model_object, languages)
-                    file.write(ds.as_string())
-                    file.write(ds.as_string(delta=True))
+                    configfile.write(ds.as_string())            # Main index
+                    configfile.write(ds.as_string(delta=True))  # Delta index
+                    shfile.write(ds.get_index_command(args[1]))
 
-        file.write(INDEXER_SETTINGS)
-        file.write(SEARCHD_SETTINGS)
+
+        configfile.write(INDEXER_SETTINGS)
+        configfile.write(SEARCHD_SETTINGS)

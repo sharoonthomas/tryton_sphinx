@@ -57,7 +57,20 @@ class XMLSource(object):
             model_object._name)
         return cls(model_object._table, command, languages=languages)
 
-    def get_sphinx_name(self, langauge, delta=False):
+    def get_index_command(self, sphinx_config_file):
+        """Returns two commands, one to build the delta index and another to 
+        merge
+        """
+        sphinx_config_file = os.path.abspath(sphinx_config_file)
+        template = Environment().from_string("""
+{% for language in cls.languages %}
+/usr/local/bin/indexer {{ cls.get_sphinx_name(language, True) }} --config {{ sphinx_config_file }} --rotate
+/usr/local/bin/indexer --merge {{ cls.get_sphinx_name(language, False) }} {{ cls.get_sphinx_name(language, True) }} --config {{ sphinx_config_file }} --rotate
+{% endfor %}
+""")
+        return template.render(cls=self, sphinx_config_file=sphinx_config_file)
+
+    def get_sphinx_name(self, language, delta=False):
         if delta:
             return '%s_%s_delta' % (self.name, language)
         return '%s_%s' % (self.name, language)
@@ -70,10 +83,11 @@ class XMLSource(object):
         in the sphinx config"""
         template = Environment().from_string("""
 {% for language in cls.languages %}
+source {{ cls.get_sphinx_name(language, delta) }}
 {% if delta %}
-source {{cls.name}}_{{ language }}_delta : {{cls.name}}_{{ language }}
+source {{ cls.get_sphinx_name(language, True) }} :  {{ cls.get_sphinx_name(language, False) }}
 {% else %}
-source {{cls.name}}_{{ language }}
+source  {{ cls.get_sphinx_name(language, False) }}
 {% endif %}
 {
     type                =   xmlpipe
@@ -89,13 +103,13 @@ source {{cls.name}}_{{ language }}
 }
 
 {% if delta %}
-index {{cls.name}}_{{ language }}_delta : {{cls.name}}_{{ language }}
+index {{ cls.get_sphinx_name(language, True) }} : {{ cls.get_sphinx_name(language, False) }}
 {% else %}
-index {{cls.name}}_{{ language }}
+{{ cls.get_sphinx_name(language, False) }}
 {% endif %}
 {
-    source              =   {{ cls.name }}_{{ language }}{% if delta %}_delta{% endif %}
-    path                =   {{ config.options['data_path'] }}/sphinx/{{cls.name}}_{{ language }}{% if delta %}_delta{% endif %}
+    source              =   {{ cls.get_sphinx_name(language, delta) }}
+    path                =   {{ config.options['data_path'] }}/sphinx/{{ cls.get_sphinx_name(language, delta) }}
     charset_type        =   utf-8
 }
 
